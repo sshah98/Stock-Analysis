@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
-from matplotlib.finance import candlestick_ohlc
-import matplotlib.dates as mdates
 
 style.use('ggplot')
 
