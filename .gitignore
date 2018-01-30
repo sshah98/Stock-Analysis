@@ -1,2 +1,5 @@
 /env
+/tickers
+sp500_joined_closes.csv
+sp500tickers.pickle
 /__pycache__
