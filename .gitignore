@@ -1,6 +1,2 @@
 /env
-/tutorial/TSLA.csv
-/tutorial/sp500tickers.pickle
-/tutorial/sp500_joined_closes.csv
-/tutorial/stock_dfs
-
+/__pycache__
