@@ -10,12 +10,25 @@ from urllib.parse import urlencode
 from urllib.request import urlretrieve
 
 
+BALANCESHEET_DIR = 'balancesheet/'
+CASHFLOW_DIR = 'cashflow/'
+HISTORICAL_DATA_DIR = 'historical_data/'
+INCOMESTATEMENT_DIR = 'incomestatement/'
+KEYRATIO_DIR = 'keyratio/'
+
+
+def assure_path_exists(path):
+    dir = os.path.dirname(path)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+
 def get_cookie_value(r):
     return {'B': r.cookies['B']}
 
 
 def get_page_data(symbol):
-    print("Getting webpage data...")
+    print("[INFO] Getting webpage data...")
     url = "https://finance.yahoo.com/quote/{0}/?p={0}".format(symbol)
     r = requests.get(url)
     cookie = get_cookie_value(r)
@@ -29,7 +42,7 @@ def find_crumb_store(lines):
     for l in lines:
         if re.findall(r'CrumbStore', l):
             return l
-    print("Did not find CrumbStore")
+    print("[INFO] Did not find CrumbStore")
 
 
 def split_crumb_store(v):
@@ -43,14 +56,23 @@ def get_cookie_crumb(symbol):
 
 
 def get_data(symbol, start_date, end_date, cookie, crumb):
+    assure_path_exists(HISTORICAL_DATA_DIR)
     filename = 'historical_data/{0}.csv'.format(symbol)
-    print("Getting historical stock data...")
+    print("[INFO] Getting historical stock data...")
     url = "https://query1.finance.yahoo.com/v7/finance/download/{0}?period1={1}&period2={2}&interval=1d&events=history&crumb={3}".format(
         symbol, start_date, end_date, crumb)
     response = requests.get(url, cookies=cookie)
     with open(filename, 'wb') as handle:
         for block in response.iter_content(1024):
             handle.write(block)
+
+
+def get_news(symbol, cookie, crumb):
+    url = "https://finance.yahoo.com/quote/{0}/?p={0}&crumb={1}".format(
+        symbol, crumb)
+
+    response = requests.get(url, cookies=cookie)
+    print(response.text)
 
 
 def get_now_epoch():
@@ -62,8 +84,9 @@ def download_quotes(symbol):
     start_date = 0
     end_date = get_now_epoch()
     cookie, crumb = get_cookie_crumb(symbol)
-    print("Downloading data...")
+    print("[INFO] Downloading data...")
     get_data(symbol, start_date, end_date, cookie, crumb)
+    get_news(symbol, cookie, crumb)
 
 
 # Encodes morningstar base URL with **params
@@ -80,7 +103,11 @@ def acquire_ms_data(ticker):
     output_name = ticker + '.csv'
 
     # Dictionary: Query type, Internal type ref, directory path
-    print("Making necessary directories")
+    print("[INFO] Making necessary directories")
+    assure_path_exists(KEYRATIO_DIR)
+    assure_path_exists(BALANCESHEET_DIR)
+    assure_path_exists(INCOMESTATEMENT_DIR)
+    assure_path_exists(CASHFLOW_DIR)
     output_map = {'kr': ['kr', './keyratio'], 'is': ['fs', './incomestatement'],
                   'bs': ['fs', './balancesheet'], 'cf': ['fs', './cashflow']}
 
@@ -89,35 +116,15 @@ def acquire_ms_data(ticker):
         output_path = os.path.join(fInfo[1], output_name)
 
         # Build http query
-        print("Getting data from stock ticker...")
+        print("[INFO] Getting data from stock ticker...")
         if fInfo[0] == 'kr':
             url = get_morningstar_url(fInfo[0], t=ticker)
         else:
             url = get_morningstar_url(fInfo[0], t=ticker, reportType=qType,
                                       period=12, dataType='A', order='asc', columnYear=5, number=1)
         # Download & save data
-        print("Saving data...")
+        print("[INFO] Saving data...")
         urlretrieve(url, output_path)
 
 
-# def get_earnings(symbol):
-#
-#     url = 'https://www.zacks.com/stock/research/{0}/earnings-announcements'.format(
-#         symbol)
-#     source = requests.get(url).text
-#     soup = BeautifulSoup(source, 'html.parser')
-#     table = soup.find(lambda tag: tag.name == 'table' and tag.has_attr(
-#         'id') and tag['id'] == "earnings_announcements_earnings_table")
-#     print(table)
-
-
-symbol = input('Enter the symbol: ')
-print("--------------------------------------------------")
-print("Downloading {0} to {0}.csv".format(symbol))
-try:
-    download_quotes(symbol)
-    acquire_ms_data(symbol)
-except KeyError:
-    print("Please enter a correct ticker...")
-    
-print("--------------------------------------------------")
+download_quotes('AAPL')
