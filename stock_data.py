@@ -15,6 +15,7 @@ CASHFLOW_DIR = 'cashflow/'
 HISTORICAL_DATA_DIR = 'historical_data/'
 INCOMESTATEMENT_DIR = 'incomestatement/'
 KEYRATIO_DIR = 'keyratio/'
+YAHOO_INFO_DIR = 'news/'
 
 
 def assure_path_exists(path):
@@ -68,12 +69,40 @@ def get_data(symbol, start_date, end_date, cookie, crumb):
 
 
 def get_news(symbol, cookie, crumb):
+    assure_path_exists(YAHOO_INFO_DIR)
+
+    filename = 'news/{0}.csv'.format(symbol)
+    
     url = "https://finance.yahoo.com/quote/{0}/?p={0}&crumb={1}".format(
         symbol, crumb)
-
+    
     response = requests.get(url, cookies=cookie)
-    print(response.text)
-
+    html = response.text
+    soup = BeautifulSoup(html, 'lxml')
+    
+    mydivs = soup.find_all("div", {"id": "quoteNewsStream-0-Stream"})
+    print(mydivs[0])
+    # for script in soup(["script", "style"]):
+    #     script.decompose()
+    # # 
+    
+    print(mydivs[0].get_text())
+    # print(soup.get_text())
+    # text = soup.get_text()
+    # # break into lines and remove leading and trailing space on each
+    # lines = (line.strip() for line in text.splitlines())
+    # # break multi-headlines into a line each
+    # chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+    # # drop blank lines
+    # text = '\n'.join(chunk for chunk in chunks if chunk)
+    
+    
+    
+    # with open(filename, 'w') as handle:
+    #     handle.write(text)
+    
+    # print(text.encode('utf-8'))
+    
 
 def get_now_epoch():
     # @see https://www.linuxquestions.org/questions/programming-9/python-datetime-to-epoch-4175520007/#post5244109
