@@ -72,6 +72,7 @@ def get_data(symbol, start_date, end_date, cookie, crumb):
 def get_news(symbol, cookie, crumb):
     assure_path_exists(YAHOO_INFO_DIR)
     filename = 'news/{0}.csv'.format(symbol)
+    print("[INFO] Getting news of stock...")
     url = "https://finance.yahoo.com/quote/{0}/?p={0}&crumb={1}".format(
         symbol, crumb)
     response = requests.get(url, cookies=cookie)
