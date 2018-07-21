@@ -76,6 +76,7 @@ def get_news(symbol, cookie, crumb):
     url = "https://finance.yahoo.com/quote/{0}/?p={0}&crumb={1}".format(
         symbol, crumb)
     response = requests.get(url, cookies=cookie)
+
     html = response.text
     soup = BeautifulSoup(html, 'lxml')
     mydivs = soup.find_all("div", {"id": "quoteNewsStream-0-Stream"})

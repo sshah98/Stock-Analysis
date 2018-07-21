@@ -6,15 +6,15 @@ from stock_data import acquire_ms_data
 
 symbol = input('Enter the symbol: ')
 print("--------------------------------------------------")
-print("Downloading {0} to {0}.csv".format(symbol))
-try:
-    download_quotes(symbol)
-    acquire_ms_data(symbol)
-except KeyError:
-    print("Please enter a correct ticker...")
-    
+# print("Downloading {0} to {0}.csv".format(symbol))
+# try:
+#     download_quotes(symbol)
+#     acquire_ms_data(symbol)
+# except KeyError:
+#     print("Please enter a correct ticker...")
+# 
 print("--------------------------------------------------")
 
-# df = pd.read_csv('balancesheet/{0}.csv'.format(stock))
+df = pd.read_csv('historical_data/{0}.csv'.format(symbol))
 
-# print(df)
+print(df)
